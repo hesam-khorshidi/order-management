@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"order-management/common"
+	"order-management/providers"
+	"order-management/routers"
 	"os"
 	"strings"
 )
@@ -43,6 +45,13 @@ func main() {
 	if err := engine.SetTrustedProxies(nil); err != nil {
 		log.Fatalf("unable to set trusted proxies: %s", err.Error())
 	}
+
+	//Initialize db service
+	db := providers.ConnectToDB()
+	providers.AutoMigrate(db)
+
+	//Initializing api routing
+	routers.InitializeLogisticsApiRoute(engine, db)
 
 	// Starting engine
 	if err := engine.Run(":" + ginPort); err != nil {

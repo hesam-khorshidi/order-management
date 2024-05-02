@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"order-management/common"
+	"order-management/entity"
 )
 
 func ConnectToDB() *gorm.DB {
@@ -27,4 +28,11 @@ func ConnectToDB() *gorm.DB {
 	}
 
 	return db
+}
+
+func AutoMigrate(db *gorm.DB) {
+	err := db.AutoMigrate(&entity.Provider{}, &entity.Customer{}, &entity.Order{})
+	if err != nil {
+		log.Printf("error auto migrate entities: %s", err.Error())
+	}
 }
