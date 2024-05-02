@@ -11,12 +11,12 @@ type OrderService interface {
 }
 
 type OrderServiceImpl struct {
-	repository repository.OrderRepositoryImpl
-	smsService SmsServiceImpl
+	repository repository.OrderRepository
+	smsService SmsService
 }
 
 func (service *OrderServiceImpl) UpdateOrderStatus(request entity.UpdateOrderRequest) error {
-	//checking if updated status is PICKED_UP
+	// checking if updated status is PICKED_UP
 	if request.Status == entity.PICKED_UP {
 		notified, err := service.repository.CheckNotifiedStatus(request.OrderReferenceId)
 		if err != nil {
@@ -34,17 +34,17 @@ func (service *OrderServiceImpl) UpdateOrderStatus(request entity.UpdateOrderReq
 		service.smsService.SendSms(fmt.Sprintf("Order number %d status changed to %s", request.OrderReferenceId, request.Status), receiverNumber)
 		return service.repository.UpdateOrderStatus(request)
 	} else {
-		//Get customer phone number from database
+		// Get customer phone number from database
 		receiverNumber, err := service.repository.GetOrderReceiverNumber(request.OrderReferenceId)
 		if err != nil {
 			return err
 		}
-		//Notify User and update record
+		// Notify User and update record
 		service.smsService.SendSms(fmt.Sprintf("Order number %d status changed to %s", request.OrderReferenceId, request.Status), receiverNumber)
 		return service.repository.UpdateOrderStatus(request)
 	}
 }
 
-func NewOrderService(r repository.OrderRepositoryImpl, smsService SmsServiceImpl) OrderService {
+func NewOrderService(r repository.OrderRepository, smsService SmsService) OrderService {
 	return &OrderServiceImpl{repository: r, smsService: smsService}
 }
